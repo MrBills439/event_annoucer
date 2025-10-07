@@ -104,3 +104,49 @@ resource "aws_lambda_permission" "api_permission" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/*"
 }
+
+
+
+# =============================
+#  S3 Bucket for Frontend
+# =============================
+resource "aws_s3_bucket" "frontend" {
+  bucket = "event-announcer-frontend-${random_integer.rand.result}"
+  acl    = "public-read"
+
+  website {
+    index_document = "index.html"
+  }
+}
+
+resource "aws_s3_bucket_website_configuration" "frontend_website" {
+  bucket = aws_s3_bucket.frontend.bucket
+  index_document {
+    suffix = "index.html"
+  }
+}
+
+resource "random_integer" "rand" {
+  min = 10000
+  max = 99999
+}
+
+resource "aws_s3_object" "index_html" {
+  bucket       = aws_s3_bucket.frontend.bucket
+  key          = "index.html"
+  source       = "${path.module}/index.html"
+  content_type = "text/html"
+  acl          = "public-read"
+}
+
+# =============================
+#  Outputs
+# =============================
+output "api_url" {
+  value = aws_apigatewayv2_api.api.api_endpoint
+}
+
+output "frontend_url" {
+  value = aws_s3_bucket.frontend.website_endpoint
+}
+
