@@ -15,33 +15,57 @@ resource "aws_dynamodb_table" "events" {
     }
 }
 
+
+# =============================
 # SNS Topic
-
-resource "aws_sns_topic" "event_role" {
-    name = "event_lambda_role"
-
-    assume_role_policy = jsonencode({
-        version = "2012-10-17"
-        Statement =[{
-            Action = "sts:AssumeRole"
-            Effect = "Allow"
-            Princpal {
-                service ="lambda.amazonaws.com
-            }
-        }]
-    })
+# =============================
+resource "aws_sns_topic" "event_topic" {
+  name = "event-topic"
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_policy_dynamodb" {
-    role    = aws_iam_role.lambda_role.name
-    policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+# =============================
+# IAM Role for Lambda
+# =============================
+resource "aws_iam_role" "lambda_role" {
+  name = "lambda_role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+# Attach policies
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic" {
-    role =aws_iam_role.lambda_role.name
-    policy_arn = "arn:aws:iam::aws:policy/service-roel/AWSLambdaBasicExecutionRole"
-
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+
+
+
+
+
+
+
+
+
+
 
 
 #============================
