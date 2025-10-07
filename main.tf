@@ -79,19 +79,20 @@ data "archive_file" "lambda_zip" {
 }
 
 resource "aws_lambda_function" "event_lambda" {
-    function_name = "event-sumbmitter"
-    handler       = "lambda_function.lambda_handler"
-    runtime       = "python3.9"
-    role          = "aws_iam_role.lambda_role.arn
-    filename      = "data.archive_file.lambda_zip.output_path
-    timeout       = 10
-    environment {
-        variables = {
-            TABLE_NAME = aws_dynamodb_table.events.name
-            TOPIC_ARN  = aws_sns_topic.event_topic.arn
-        }
+  function_name = "eventLambda"
+  role          = aws_iam_role.lambda_role.arn
+  filename      = data.archive_file.lambda_zip.output_path
+  handler       = "index.handler"
+  runtime       = "nodejs18.x"
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.event_table.name
+      TOPIC_ARN  = aws_sns_topic.event_topic.arn
     }
+  }
 }
+
 
 #======================
 # API Gateway
