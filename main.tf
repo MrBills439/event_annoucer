@@ -42,3 +42,30 @@ resouce "aws_iam_role_policy_attachment" "lambda_basic" {
     policy_arn = "aen:aws:iam::aws:policy/service-roel/AWSLambdaBasicExecutionRole"
 
 }
+
+
+#============================
+# lambda Function
+#============================
+
+data "archive_file" "lambda_zip" {
+    type        = "zip"
+    source_dir  = "${path.module}/lambda"
+    output_path = "${path.module}/lambda_zip"
+}
+
+resouce "aws_lambda_function" "event_lambda" {
+    function_name = "event-sumbmitter"
+    handler       = "lambda_function.lambda_handler"
+    runtime       = "python3.9"
+    role          = "aws_iam_role.lambda_role.arn
+    filename      = "data.archive_file.lambda_zip.output_path
+    timeout       = 10
+    enviroment {
+        variables = {
+            TABLE_NAME = aws_dynamodb_table.events.name
+            TOPIC_ARN  = aws_sns_topic.event_topic.arn
+        }
+    }
+}
+
