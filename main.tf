@@ -4,7 +4,7 @@ provider "aws" {
 
 # DynamoDB Table
 
-resouce "aws_dynamodb_table" "events" {
+resource "aws_dynamodb_table" "events" {
     name         = "Events"
     billing_mode = "PAY_PER_REQUEST"
     hash_key     = "eventId"
@@ -17,7 +17,7 @@ resouce "aws_dynamodb_table" "events" {
 
 # SNS Topic
 
-resouce "aws_sns_topic" "event_role" {
+resource "aws_sns_topic" "event_role" {
     name = "event_lambda_role"
 
     assume_role_policy = jsonencode({
@@ -32,12 +32,12 @@ resouce "aws_sns_topic" "event_role" {
     })
 }
 
-resouce "aws_iam_role_policy_attachment" "lambda_policy_dynamodb" {
+resource "aws_iam_role_policy_attachment" "lambda_policy_dynamodb" {
     role    = aws_iam_role.lambda_role.name
     policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
-resouce "aws_iam_role_policy_attachment" "lambda_basic" {
+resource "aws_iam_role_policy_attachment" "lambda_basic" {
     role =aws_iam_role.lambda_role.name
     policy_arn = "aen:aws:iam::aws:policy/service-roel/AWSLambdaBasicExecutionRole"
 
@@ -54,7 +54,7 @@ data "archive_file" "lambda_zip" {
     output_path = "${path.module}/lambda_zip"
 }
 
-resouce "aws_lambda_function" "event_lambda" {
+resource "aws_lambda_function" "event_lambda" {
     function_name = "event-sumbmitter"
     handler       = "lambda_function.lambda_handler"
     runtime       = "python3.9"
@@ -73,7 +73,7 @@ resouce "aws_lambda_function" "event_lambda" {
 # API Gateway
 #======================
 
-resouce "aws_apigatewayv2_api" "api" {
+resource "aws_apigatewayv2_api" "api" {
     name            = "event-api"
     protocol_type   = "HTTP"
 }
