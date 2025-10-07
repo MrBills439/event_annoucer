@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Announcer</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        overflow-x: hidden;
+      }
+
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .main-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        perspective: 1000px;
+      }
+
+      .form-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        padding: 50px 40px;
+        box-shadow: 
+          0 25px 50px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transform-style: preserve-3d;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .form-container:hover {
+        transform: rotateX(2deg) rotateY(-2deg) translateY(-10px);
+        box-shadow: 
+          0 35px 70px rgba(0, 0, 0, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+
+      .title {
+        text-align: center;
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #ffffff, #f8f9ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+        margin-bottom: 40px;
+        font-weight: 400;
+      }
+
+      .form-group {
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      .input-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .input-wrapper:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .input-wrapper:focus-within {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+        transform: translateY(-3px);
+      }
+
+      .input-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.6s;
+      }
+
+      .input-wrapper:focus-within::before {
+        left: 100%;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      textarea {
+        width: 100%;
+        padding: 18px 24px;
+        border: none;
+        background: transparent;
+        color: white;
+        font-size: 16px;
+        font-family: inherit;
+        outline: none;
+        font-weight: 400;
+      }
+
+      input[type="text"]::placeholder,
+      textarea::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 300;
+      }
+
+      input[type="date"] {
+        color-scheme: dark;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 120px;
+        font-family: inherit;
+      }
+
+      .submit-container {
+        margin-top: 40px;
+        position: relative;
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 20px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 16px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        backdrop-filter: blur(10px);
+      }
+
+      .submit-btn:hover {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      }
+
+      .submit-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .plane-icon {
+        font-size: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .submit-btn:hover .plane-icon {
+        transform: translateX(5px) rotate(15deg);
+      }
+
+      /* Paper Plane Animation */
+      .paper-plane {
+        position: fixed;
+        font-size: 24px;
+        color: white;
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0;
+        transform: rotate(-45deg);
+      }
+
+      .paper-plane.flying {
+        animation: flyPlane 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      }
+
+      @keyframes flyPlane {
+        0% {
+          opacity: 1;
+          transform: rotate(-45deg) scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: rotate(-30deg) scale(1.2);
+        }
+        100% {
+          opacity: 0;
+          transform: rotate(-15deg) scale(0.8) translateX(100vw) translateY(100vh);
+        }
+      }
+
+      .success-message,
+      .error-message {
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 16px;
+        font-weight: 500;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        backdrop-filter: blur(10px);
+      }
+
+      .success-message {
+        background: rgba(72, 187, 120, 0.2);
+        color: #68d391;
+        border: 1px solid rgba(72, 187, 120, 0.3);
+      }
+
+      .error-message {
+        background: rgba(245, 101, 101, 0.2);
+        color: #fc8181;
+        border: 1px solid rgba(245, 101, 101, 0.3);
+      }
+
+      .success-message.show,
+      .error-message.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .floating-element {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .floating-element:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+
+      .floating-element:nth-child(2) {
+        width: 60px;
+        height: 60px;
+        top: 60%;
+        right: 15%;
+        animation-delay: 2s;
+      }
+
+      .floating-element:nth-child(3) {
+        width: 40px;
+        height: 40px;
+        top: 80%;
+        left: 20%;
+        animation-delay: 4s;
+      }
+
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0px) rotate(0deg);
+          opacity: 0.3;
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+          opacity: 0.6;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .form-container {
+          padding: 40px 25px;
+          margin: 10px;
+        }
+
+        .title {
+          font-size: 2.2rem;
+        }
+
+        .subtitle {
+          font-size: 1rem;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        textarea {
+          padding: 15px 20px;
+        }
+
+        .submit-btn {
+          padding: 18px;
+          font-size: 16px;
+        }
+      }
+
+      .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s linear infinite;
+      }
+
+      .loading-spinner.show {
+        display: inline-block;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="floating-elements">
+      <div class="floating-element"></div>
+      <div class="floating-element"></div>
+      <div class="floating-element"></div>
+    </div>
+
+    <div class="main-container">
+      <div class="form-container">
+        <h1 class="title">Event Creator</h1>
+        <p class="subtitle">Bring your vision to life</p>
+        
+        <form id="eventForm">
+          <div class="form-group">
+            <label for="title">Event Title</label>
+            <div class="input-wrapper">
+              <input type="text" id="title" placeholder="What's your event called?" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="date">Event Date</label>
+            <div class="input-wrapper">
+              <input type="date" id="date" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="desc">Event Description</label>
+            <div class="input-wrapper">
+              <textarea id="desc" placeholder="Tell us about your amazing event..." required></textarea>
+            </div>
+          </div>
+
+          <div class="submit-container">
+            <button type="submit" class="submit-btn">
+              <div class="btn-content">
+                <span class="btn-text">Launch Event</span>
+                <span class="plane-icon">✈️</span>
+                <div class="loading-spinner" id="loading"></div>
+              </div>
+            </button>
+          </div>
+        </form>
+
+        <div id="successMessage" class="success-message">
+          🎉 Event launched successfully! Your event is now live.
+        </div>
+
+        <div id="errorMessage" class="error-message">
+           Launch failed. Please check your connection and try again.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const apiUrl = "YOUR_API_GATEWAY_URL_HERE";
+
+      // Set minimum date to today
+      document.getElementById('date').min = new Date().toISOString().split('T')[0];
+
+      function createPaperPlane(startX, startY) {
+        const plane = document.createElement('div');
+        plane.className = 'paper-plane';
+        plane.innerHTML = '✈️';
+        plane.style.left = startX + 'px';
+        plane.style.top = startY + 'px';
+        document.body.appendChild(plane);
+
+        // Start animation
+        setTimeout(() => {
+          plane.classList.add('flying');
+        }, 100);
+
+        // Remove element after animation
+        setTimeout(() => {
+          document.body.removeChild(plane);
+        }, 2100);
+      }
+
+      document.getElementById('eventForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = e.target.querySelector('.submit-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const planeIcon = submitBtn.querySelector('.plane-icon');
+        const loading = document.getElementById('loading');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Get button position for plane animation
+        const btnRect = submitBtn.getBoundingClientRect();
+        const startX = btnRect.left + btnRect.width / 2;
+        const startY = btnRect.top + btnRect.height / 2;
+        
+        // Reset messages
+        successMessage.classList.remove('show');
+        errorMessage.classList.remove('show');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        btnText.textContent = 'Launching...';
+        planeIcon.style.display = 'none';
+        loading.classList.add('show');
+        
+        // Create and animate paper plane
+        createPaperPlane(startX, startY);
+        
+        try {
+          const eventData = {
+            title: document.getElementById('title').value,
+            date: document.getElementById('date').value,
+            description: document.getElementById('desc').value
+          };
+
+          // Simulate API call delay for better UX
+          await new Promise(resolve => setTimeout(resolve, 1500));
+
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(eventData)
+          });
+
+          if (res.ok) {
+            successMessage.classList.add('show');
+            e.target.reset();
+            // Reset date minimum after form reset
+            document.getElementById('date').min = new Date().toISOString().split('T')[0];
+          } else {
+            throw new Error('Submission failed');
+          }
+        } catch (error) {
+          errorMessage.classList.add('show');
+        } finally {
+          // Reset button state
+          submitBtn.disabled = false;
+          btnText.textContent = 'Launch Event';
+          planeIcon.style.display = 'inline';
+          loading.classList.remove('show');
+        }
+      });
+
+      // Enhanced input interactions
+      const inputWrappers = document.querySelectorAll('.input-wrapper');
+      inputWrappers.forEach(wrapper => {
+        const input = wrapper.querySelector('input, textarea');
+        
+        input.addEventListener('focus', function() {
+          wrapper.style.transform = 'translateY(-3px) scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+          wrapper.style.transform = 'translateY(0) scale(1)';
+        });
+      });
+
+      // Auto-hide messages after 6 seconds
+      function autoHideMessage(element) {
+        setTimeout(() => {
+          element.classList.remove('show');
+        }, 6000);
+      }
+
+      // Observer for message display
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.target.classList.contains('show')) {
+            autoHideMessage(mutation.target);
+          }
+        });
+      });
+
+      observer.observe(document.getElementById('successMessage'), { attributes: true, attributeFilter: ['class'] });
+      observer.observe(document.getElementById('errorMessage'), { attributes: true, attributeFilter: ['class'] });
+
+      // Add subtle parallax effect to floating elements
+      document.addEventListener('mousemove', (e) => {
+        const floatingElements = document.querySelectorAll('.floating-element');
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+
+        floatingElements.forEach((element, index) => {
+          const speed = (index + 1) * 0.5;
+          const x = (mouseX - 0.5) * speed * 20;
+          const y = (mouseY - 0.5) * speed * 20;
+          element.style.transform = `translate(${x}px, ${y}px)`;
+        });
+      });
+    </script>
+  </body>
+</html>
+
+
