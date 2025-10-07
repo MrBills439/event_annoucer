@@ -32,3 +32,13 @@ resouce "aws_sns_topic" "event_role" {
     })
 }
 
+resouce "aws_iam_role_policy_attachment" "lambda_policy_dynamodb" {
+    role    = aws_iam_role.lambda_role.name
+    policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+}
+
+resouce "aws_iam_role_policy_attachment" "lambda_basic" {
+    role =aws_iam_role.lambda_role.name
+    policy_arn = "aen:aws:iam::aws:policy/service-roel/AWSLambdaBasicExecutionRole"
+
+}
