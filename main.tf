@@ -61,7 +61,7 @@ resource "aws_lambda_function" "event_lambda" {
     role          = "aws_iam_role.lambda_role.arn
     filename      = "data.archive_file.lambda_zip.output_path
     timeout       = 10
-    enviroment {
+    environment {
         variables = {
             TABLE_NAME = aws_dynamodb_table.events.name
             TOPIC_ARN  = aws_sns_topic.event_topic.arn
